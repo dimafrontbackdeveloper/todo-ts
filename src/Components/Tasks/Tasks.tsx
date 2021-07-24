@@ -8,14 +8,14 @@ type TaskType = {
 
 type TasksType = {
   tasks: Array<TaskType>;
-  deleteTask: (id: number | string) => void;
+  deleteTaskOnClick: (id: number | string) => void;
 };
 
-const Tasks: React.FC<TasksType> = ({ tasks, deleteTask }) => {
+const Tasks: React.FC<TasksType> = ({ tasks, deleteTaskOnClick }) => {
   return (
     <div className="tasks" style={{ marginTop: '50px' }}>
       {tasks.map((task: TaskType) => (
-        <Task key={task.id} task={task} deleteTask={deleteTask} />
+        <Task key={task.id} task={task} deleteTaskOnClick={deleteTaskOnClick} />
       ))}
     </div>
   );

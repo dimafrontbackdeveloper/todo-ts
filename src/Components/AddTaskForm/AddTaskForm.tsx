@@ -3,14 +3,14 @@ import './../../App.css';
 
 type AddTaskFormType = {
   inputValue: string;
-  addTask: () => void;
+  getTasksOnClick: () => void;
   inputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   inputPlaceholder: string;
 };
 
 const AddTaskForm: React.FC<AddTaskFormType> = ({
   inputValue,
-  addTask,
+  getTasksOnClick,
   inputChange,
   inputPlaceholder,
 }) => {
@@ -29,7 +29,7 @@ const AddTaskForm: React.FC<AddTaskFormType> = ({
           value={inputValue}
           onChange={inputChange}
         />
-        <button className="btn btn-primary" type="button" onClick={addTask}>
+        <button className="btn btn-primary" type="button" onClick={getTasksOnClick}>
           Add task
         </button>
       </form>

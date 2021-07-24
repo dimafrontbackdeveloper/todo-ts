@@ -1,32 +1,29 @@
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import './App.css';
 import AddTaskForm from './Components/AddTaskForm/AddTaskForm';
 import Tasks from './Components/Tasks/Tasks';
 import Alert from './Components/Alert/Alert';
+import { addTasks, deleteTask, getTasks } from './api/api';
 
 function App() {
-  const [inputValue, setInputValue] = useState('');
-  const [tasks, setTasks] = useState([]);
-  const [isTaskError, setIsTaskError] = useState(false);
-  const [inputPlaceholder, setInputPlaceholder] = useState('');
+  const [inputValue, setInputValue] = useState<string>('');
+  const [tasks, setTasks] = useState<TasksType[]>([]);
+  const [isTaskError, setIsTaskError] = useState<boolean>(false);
+  const [inputPlaceholder, setInputPlaceholder] = useState<string>('');
+
+  type TasksType = {
+    id: string;
+    taskText: string;
+  };
 
   // Начальная подгрузка
   useEffect(() => {
     // Начальная подгрузка тасков
-    const getTasks = async () => {
-      try {
-        const responce = await axios.get('https://60e33ab26c365a0017839208.mockapi.io/tasks');
-        if (responce.status >= 200 && responce.status < 300) {
-          setTasks(responce.data);
-        }
-      } catch (error) {
-        throw new Error(
-          `Что-то пошло не так при попытке инициализации приложения взять таски : ${error}`,
-        );
-      }
+    const initialGetTasks = async () => {
+      const responce: Array<TasksType> = await getTasks();
+      setTasks(responce);
     };
-    getTasks();
+    initialGetTasks();
 
     // Создание плейсхолдер для инпута
     changeInputPlaceholder();
@@ -49,44 +46,29 @@ function App() {
   };
 
   // Добавление таски
-  const addTask = async () => {
+  const getTasksOnClick = async () => {
     // Если не будет значения у инпута,то чтобы показало ошибку и не добавилось в БД
     if (!inputValue) {
       setIsTaskError(true);
     } else {
       const newTask = inputValue;
 
-      try {
-        const responce = await axios.post('https://60e33ab26c365a0017839208.mockapi.io/tasks', {
-          taskText: newTask,
-        });
+      const responce = await addTasks(newTask);
+      if (responce.status >= 200 && responce.status < 300) {
+        const tasks: Array<TasksType> = await getTasks();
 
-        if (responce.status >= 200 && responce.status < 300) {
-          // Зануление инпута и получения новых данных после post запроса
-          setInputValue('');
-          const responce = await axios.get('https://60e33ab26c365a0017839208.mockapi.io/tasks');
-
-          if (responce.status >= 200 && responce.status < 300) {
-            setTasks(responce.data);
-          }
-        }
-      } catch (error) {
-        throw new Error(`Что-то пошло не так при попытке добавить задание : ${error}`);
+        setTasks(tasks);
+        setInputValue('');
       }
     }
   };
 
   // Удаление таски
-  const deleteTask = async (id: number | string) => {
-    try {
-      const responce = await axios.delete(
-        `https://60e33ab26c365a0017839208.mockapi.io/tasks/${id}`,
-      );
-      if (responce.status >= 200 && responce.status < 300) {
-        setTasks(tasks.filter((task: any) => task.id !== id));
-      }
-    } catch (error) {
-      throw new Error(`Что-то пошло не так при попытке удалить задание : ${error}`);
+  const deleteTaskOnClick = async (id: number | string) => {
+    const responce = await deleteTask(id);
+
+    if (responce.status >= 200 && responce.status < 300) {
+      setTasks(tasks.filter((task: any) => task.id !== id));
     }
   };
 
@@ -110,14 +92,14 @@ function App() {
         )}
         <AddTaskForm
           inputValue={inputValue}
-          addTask={addTask}
+          getTasksOnClick={getTasksOnClick}
           inputChange={inputChange}
           inputPlaceholder={inputPlaceholder}
         />
         {tasks.length === 0 || !tasks ? (
           <div style={{ marginTop: '30px', fontSize: '20px' }}>Введите пожалуйста задачу</div>
         ) : (
-          <Tasks tasks={tasks} deleteTask={deleteTask} />
+          <Tasks tasks={tasks} deleteTaskOnClick={deleteTaskOnClick} />
         )}
       </div>
     </div>
